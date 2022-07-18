@@ -1,0 +1,43 @@
+version: '3'
+
+services:
+  database:
+    image: 'postgres:latest'
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+  
+  chrome:
+    image: selenium/node-chrome:4.3.0-20220706
+    shm_size: 2gb
+    depends_on:
+      - selenium-hub
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+
+  selenium-hub:
+    image: selenium/hub:4.3.0-20220706
+    container_name: selenium-hub
+    ports:
+      - "4442:4442"
+      - "4443:4443"
+      - "4444:4444"
+
+  webapp:
+    build: .
+    ports:
+      - "8080:8080"
+    depends_on:
+      - database
+      - selenium-hub
+    stdin_open: true
+    tty: true
+
+
+
